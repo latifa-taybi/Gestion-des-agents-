@@ -79,4 +79,17 @@ public class Paiement {
     public void setAgent(Agent agent) {
         this.agent = agent;
     }
+
+    @Override
+    public String toString() {
+        return "Paiement{" +
+                "idPaiement=" + idPaiement +
+                ", typePaiement=" + typePaiement +
+                ", montant=" + montant +
+                ", date=" + date +
+                ", motif='" + motif + '\'' +
+                ", conditionValidee=" + conditionValidee +
+                ", agent=" + agent +
+                '}';
+    }
 }

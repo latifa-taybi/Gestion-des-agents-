@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IAgentDaoImpl implements IAgentDao {
+public class AgentDaoImpl implements IAgentDao {
 
     @Override
     public Agent get(int id) throws SQLException {

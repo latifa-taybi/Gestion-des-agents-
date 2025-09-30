@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IDepartementDaoImpl implements IDepartementDao {
+public class DepartementDaoImpl implements IDepartementDao {
 
     @Override
     public Departement get(int id) throws SQLException {

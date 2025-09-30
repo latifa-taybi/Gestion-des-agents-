@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IPaiementDaoImpl implements IPaiementDao {
+public class PaiementDaoImpl implements IPaiementDao {
 
     @Override
     public Paiement get(int id) throws SQLException {

@@ -1,64 +1,48 @@
 package controller;
 
 import model.Agent;
-import model.Departement;
-import model.enums.TypeAgent;
-import service.impl.AgentServiceImpl;
+import model.Paiement;
+import service.IAgentService;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class AgentController {
 
-    private AgentServiceImpl agentServiceImpl = new AgentServiceImpl();
+    private final IAgentService agentService;
 
-    // Exemple méthode pour récupérer un agent
-    public Agent getAgentById(int id) {
+    public AgentController(IAgentService agentService) {
+        this.agentService = agentService;
+    }
+
+    public void consulterInfos(int idAgent) {
         try {
-            return agentServiceImpl.getAgent(id);
+            Agent agent = agentService.getAgentById(idAgent);
+            System.out.println(agent);
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            System.err.println("erreu: " + e.getMessage());
         }
     }
 
-    // Exemple méthode pour afficher tous les agents
-    public List<Agent> getAllAgents() {
+    public void afficherHistoriquePaiements(int idAgent) {
         try {
-            return agentServiceImpl.getAllAgents();
+            List<Paiement> paiements = agentService.getHistoriquePaiements(idAgent);
+            if (paiements.isEmpty()) {
+                System.out.println("il n existe aucune paiement");
+            } else {
+                paiements.forEach(System.out::println);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            System.err.println("erreur: " + e.getMessage());
         }
     }
 
-    // Exemple méthode pour créer un agent
-    public void createAgent(String nom, String prenom, String email, String motDePasse,
-                            TypeAgent typeAgent, Departement departement) {
-        Agent agent = new Agent(0, nom, prenom, email, motDePasse, typeAgent);
-        agent.setDepartement(departement);
+    public void afficherTotalPaiements(int idAgent) {
         try {
-            agentServiceImpl.createAgent(agent);
+            double total = agentService.calculerTotalPaiements(idAgent);
+            System.out.println("total des paiements :  " + total );
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Exemple méthode pour mettre à jour un agent
-    public void updateAgent(Agent agent) {
-        try {
-            agentServiceImpl.updateAgent(agent);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Exemple méthode pour supprimer un agent
-    public void deleteAgent(int id) {
-        try {
-            agentServiceImpl.deleteAgent(id);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("erreur: " + e.getMessage());
         }
     }
 }
