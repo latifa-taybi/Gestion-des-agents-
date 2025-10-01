@@ -5,6 +5,8 @@ import dao.IAgentDao;
 import dao.IPaiementDao;
 import model.Agent;
 import model.Paiement;
+import model.exceptions.AgentIntrouvableException;
+import model.exceptions.DatabaseException;
 import service.IAgentService;
 
 import java.sql.SQLException;
@@ -22,44 +24,68 @@ public class AgentServiceImpl implements IAgentService {
     }
 
     @Override
-    public Agent getAgentById(int id) throws SQLException {
-        Agent agent = agentDao.get(id);
-        if (agent == null) {
-            throw new SQLException("agent introuvable");
+    public Agent getAgentById(int id) throws AgentIntrouvableException, DatabaseException {
+        try{
+            Agent agent = agentDao.get(id);
+            if (agent == null) {
+                throw new AgentIntrouvableException("agent introuvable");
+            }
+            return agent;
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la recuperation de l'agent");
         }
-        return agent;
     }
 
     @Override
-    public List<Agent> getAllAgents() throws SQLException {
-        return agentDao.getAll();
+    public List<Agent> getAllAgents() throws DatabaseException {
+        try {
+            return agentDao.getAll();
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la recuperation des agents");
+        }
     }
 
     @Override
-    public Agent addAgent(Agent agent) throws SQLException {
-        return agentDao.insert(agent);
+    public Agent addAgent(Agent agent) throws DatabaseException {
+        try {
+            return agentDao.insert(agent);
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de l'ajout de l'agent");
+        }
     }
 
     @Override
-    public Agent updateAgent(Agent agent) throws SQLException {
-        return agentDao.update(agent);
+    public Agent updateAgent(Agent agent) throws DatabaseException {
+        try {
+            return agentDao.update(agent);
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la modification de l'agent");
+        }
     }
 
     @Override
-    public void deleteAgent(Agent agent) throws SQLException {
-        agentDao.delete(agent);
+    public void deleteAgent(Agent agent) throws DatabaseException {
+        try {
+            agentDao.delete(agent);
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la suppression de l'agent");
+        }
     }
 
     @Override
-    public List<Paiement> getHistoriquePaiements(int idAgent) throws SQLException {
-        return paiementDao.getAll()
-                .stream()
-                .filter(p -> p.getAgent().getIdAgent() == idAgent)
-                .collect(Collectors.toList());
+    public List<Paiement> getHistoriquePaiements(int idAgent) throws DatabaseException {
+        try {
+            return paiementDao.getAll()
+                    .stream()
+                    .filter(p -> p.getAgent().getIdAgent() == idAgent)
+                    .collect(Collectors.toList());
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la recuperation de l'historiaue de paiements");
+        }
     }
 
     @Override
-    public double calculerTotalPaiements(int idAgent) throws SQLException {
+    public double calculerTotalPaiements(int idAgent) throws DatabaseException {
         return getHistoriquePaiements(idAgent)
                 .stream()
                 .mapToDouble(Paiement::getMontant)
@@ -67,7 +93,7 @@ public class AgentServiceImpl implements IAgentService {
     }
 
     @Override
-    public List<Paiement> filtrerPaiements(int idAgent, Predicate<Paiement> critere) throws SQLException {
+    public List<Paiement> filtrerPaiements(int idAgent, Predicate<Paiement> critere) throws DatabaseException {
         return getHistoriquePaiements(idAgent)
                 .stream()
                 .filter(critere)

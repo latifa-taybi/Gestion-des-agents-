@@ -7,6 +7,10 @@ import model.Departement;
 import model.Paiement;
 import model.enums.TypeAgent;
 import model.enums.TypePaiement;
+import model.exceptions.AgentIntrouvableException;
+import model.exceptions.DatabaseException;
+import model.exceptions.DepartementIntrouvableException;
+import model.exceptions.PaiementIntrouvableException;
 import service.IResponsableService;
 
 import java.sql.SQLException;
@@ -24,73 +28,104 @@ public class ResponsableServiceImpl implements IResponsableService {
     }
 
     @Override
-    public Agent ajouterAgent(Agent agent, Departement departement) throws SQLException {
-        agent.setDepartement(departement);
-        return agentDao.insert(agent);
+    public Agent ajouterAgent(Agent agent, Departement departement) throws DepartementIntrouvableException,DatabaseException {
+        try {
+            agent.setDepartement(departement);
+            return agentDao.insert(agent);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans l'insertion d'agent");
+        }
     }
 
     @Override
-    public Agent modifierAgent(Agent agent) throws SQLException {
-        return agentDao.update(agent);
+    public Agent modifierAgent(Agent agent) throws DatabaseException, AgentIntrouvableException {
+        try {
+            return agentDao.update(agent);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la modification d'agent");
+        }
     }
 
     @Override
-    public void supprimerAgent(Agent agent) throws SQLException {
-        agentDao.delete(agent);
+    public void supprimerAgent(Agent agent) throws DatabaseException, AgentIntrouvableException {
+        try {
+            agentDao.delete(agent);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la suppression d'agent");
+        }
     }
 
     @Override
-    public List<Agent> getAgentsByDepartement(int idDepartement) throws SQLException {
-        return agentDao.getAll()
-                .stream()
-                .filter( a->a.getDepartement().getIdDepartement() == idDepartement)
-                .collect(Collectors.toList());
-    }
-
-
-    @Override
-    public Paiement ajouterPaiement(Paiement paiement) throws SQLException {
-        Agent agent = agentDao.get(paiement.getAgent().getIdAgent());
-        if (agent == null) {
-            throw new SQLException("la gent n existe pas");
+    public List<Agent> getAgentsByDepartement(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
+        try {
+            return agentDao.getAll()
+                    .stream()
+                    .filter( a->a.getDepartement().getIdDepartement() == idDepartement)
+                    .collect(Collectors.toList());
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la recuperation d'agent");
         }
 
-        if ((paiement.getTypePaiement() == TypePaiement.BONUS || paiement.getTypePaiement() == TypePaiement.INDEMNITE)) {
-            if (!(agent.getTypeAgent() == TypeAgent.RESPONSABLE_DEPARTEMENT) || !(agent.getTypeAgent() == TypeAgent.DIRECTEUR)) {
-                throw new SQLException("l agent n est pas eligible");
+    }
+
+    @Override
+    public Paiement ajouterPaiement(Paiement paiement) throws DatabaseException, AgentIntrouvableException {
+        try {
+            Agent agent = agentDao.get(paiement.getAgent().getIdAgent());
+            if (agent == null) {
+                throw new DatabaseException("l agent n existe pas");
             }
-            if (!paiement.isConditionValidee()) {
-                throw new SQLException("condition invalide");
+            if ((paiement.getTypePaiement() == TypePaiement.BONUS || paiement.getTypePaiement() == TypePaiement.INDEMNITE)) {
+                if (!(agent.getTypeAgent() == TypeAgent.RESPONSABLE_DEPARTEMENT) || !(agent.getTypeAgent() == TypeAgent.DIRECTEUR)) {
+                    throw new DatabaseException("l agent n est pas eligible");
+                }
+                if (!paiement.isConditionValidee()) {
+                    throw new DatabaseException("condition invalide");
+                }
             }
+            if (paiement.getMontant() < 0) {
+                throw new DatabaseException("le montant est negatif");
+            }
+
+            return paiementDao.insert(paiement);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans l'insertion de paiement");
+        }
+    }
+
+    @Override
+    public Paiement modifierPaiement(Paiement paiement) throws DatabaseException, PaiementIntrouvableException {
+        try {
+            return paiementDao.update(paiement);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la modification de paiement");
+        }
+    }
+
+    @Override
+    public void supprimerPaiement(Paiement paiement) throws DatabaseException, PaiementIntrouvableException {
+        try {
+            paiementDao.delete(paiement);
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la suppression de paiement");
+        }
+    }
+
+    @Override
+    public List<Paiement> getPaiementsAgentsDepartement(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
+        try {
+            return paiementDao.getAll()
+                    .stream()
+                    .filter(p -> p.getAgent().getDepartement().getIdDepartement() == idDepartement)
+                    .collect(Collectors.toList());
+        }catch(SQLException e){
+            throw new DatabaseException("erreur dans la recuperation des paiements par departement");
         }
 
-        if (paiement.getMontant() < 0) {
-            throw new SQLException("le montant est negatif");
-        }
-
-        return paiementDao.insert(paiement);
     }
 
     @Override
-    public Paiement modifierPaiement(Paiement paiement) throws SQLException {
-        return paiementDao.update(paiement);
-    }
-
-    @Override
-    public void supprimerPaiement(Paiement paiement) throws SQLException {
-        paiementDao.delete(paiement);
-    }
-
-    @Override
-    public List<Paiement> getPaiementsAgentsDepartement(int idDepartement) throws SQLException {
-        return paiementDao.getAll()
-                .stream()
-                .filter(p -> p.getAgent().getDepartement().getIdDepartement() == idDepartement)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Paiement> filtrerPaiementsDepartement(int idDepartement, Predicate<Paiement> critere) throws SQLException {
+    public List<Paiement> filtrerPaiementsDepartement(int idDepartement, Predicate<Paiement> critere) throws DatabaseException, DepartementIntrouvableException {
         return getPaiementsAgentsDepartement(idDepartement)
                 .stream()
                 .filter(critere)
@@ -98,7 +133,7 @@ public class ResponsableServiceImpl implements IResponsableService {
     }
 
     @Override
-    public double calculerTotalPaiementsDepartement(int idDepartement) throws SQLException {
+    public double calculerTotalPaiementsDepartement(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
         return getPaiementsAgentsDepartement(idDepartement)
                 .stream()
                 .mapToDouble(Paiement::getMontant)
@@ -106,7 +141,7 @@ public class ResponsableServiceImpl implements IResponsableService {
     }
 
     @Override
-    public double calculerMoyennePaiementsDepartement(int idDepartement) throws SQLException {
+    public double calculerMoyennePaiementsDepartement(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
         List<Paiement> paiements = getPaiementsAgentsDepartement(idDepartement);
         return paiements.isEmpty() ? 0 :
                 paiements.stream()
@@ -114,4 +149,6 @@ public class ResponsableServiceImpl implements IResponsableService {
                         .average()
                         .orElse(0);
     }
+
+
 }

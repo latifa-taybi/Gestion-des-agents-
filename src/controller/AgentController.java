@@ -2,9 +2,10 @@ package controller;
 
 import model.Agent;
 import model.Paiement;
+import model.exceptions.AgentIntrouvableException;
+import model.exceptions.DatabaseException;
 import service.IAgentService;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class AgentController {
@@ -19,8 +20,8 @@ public class AgentController {
         try {
             Agent agent = agentService.getAgentById(idAgent);
             System.out.println(agent);
-        } catch (SQLException e) {
-            System.err.println("erreu: " + e.getMessage());
+        } catch (AgentIntrouvableException e) {
+            System.err.println("erreur: " + e.getMessage());
         }
     }
 
@@ -32,7 +33,7 @@ public class AgentController {
             } else {
                 paiements.forEach(System.out::println);
             }
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             System.err.println("erreur: " + e.getMessage());
         }
     }
@@ -41,7 +42,7 @@ public class AgentController {
         try {
             double total = agentService.calculerTotalPaiements(idAgent);
             System.out.println("total des paiements :  " + total );
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             System.err.println("erreur: " + e.getMessage());
         }
     }

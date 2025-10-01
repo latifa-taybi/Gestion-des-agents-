@@ -1,4 +1,4 @@
-package ui;
+package view;
 
 import controller.AgentController;
 import controller.DirecteurController;
@@ -15,9 +15,7 @@ import service.IResponsableService;
 import service.impl.AgentServiceImpl;
 import service.impl.DirecteurServiceImpl;
 import service.impl.ResponsableServiceImpl;
-import view.AgentMenu;
-import view.DirecteurMenu;
-import view.ResponsableMenu;
+
 
 import java.util.Scanner;
 

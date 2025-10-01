@@ -2,9 +2,10 @@ package controller;
 
 import model.Departement;
 import model.Agent;
+import model.exceptions.DatabaseException;
+import model.exceptions.DepartementIntrouvableException;
 import service.IDirecteurService;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class DirecteurController {
@@ -19,7 +20,7 @@ public class DirecteurController {
         try {
             directeurService.ajouterDepartement(departement);
             System.out.println("departement ajoute avec succes");
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }
@@ -28,7 +29,9 @@ public class DirecteurController {
         try {
             directeurService.modifierDepartement(departement);
             System.out.println("departement modifie avec succes");
-        } catch (SQLException e) {
+        } catch (DepartementIntrouvableException e) {
+            System.err.println("departement introuvable");
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }
@@ -36,8 +39,10 @@ public class DirecteurController {
     public void supprimerDepartement(Departement departement) {
         try {
             directeurService.supprimerDepartement(departement);
-            System.out.println("departement supprimer avec succes");
-        } catch (SQLException e) {
+            System.out.println("departement supprime avec succes");
+        }catch (DepartementIntrouvableException e) {
+            System.err.println("departement introuvable");
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }
@@ -46,7 +51,7 @@ public class DirecteurController {
         try {
             List<Departement> departements = directeurService.getAllDepartements();
             departements.forEach(System.out::println);
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }
@@ -55,7 +60,9 @@ public class DirecteurController {
         try {
             directeurService.affecterResponsable(idDepartement, responsable);
             System.out.println("responsable affecte avec succes");
-        } catch (SQLException e) {
+        }catch (DepartementIntrouvableException e) {
+            System.err.println("departement introuvable");
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }
@@ -68,7 +75,9 @@ public class DirecteurController {
             } else {
                 System.out.println("pas de responsable");
             }
-        } catch (SQLException e) {
+        } catch (DepartementIntrouvableException e) {
+            System.err.println("departement introuvable");
+        } catch (DatabaseException e) {
             System.err.println("erreur : " + e.getMessage());
         }
     }

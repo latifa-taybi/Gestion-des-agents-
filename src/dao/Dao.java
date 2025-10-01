@@ -1,5 +1,6 @@
 package dao;
-import model.exceptions.DaoException;
+
+import model.exceptions.DatabaseException;
 
 import java.sql.SQLException;
 import java.util.List;
