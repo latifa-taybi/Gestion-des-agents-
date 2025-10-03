@@ -1,6 +1,6 @@
 package dao.impl;
 
-import Util.DatabaseConnexion;
+import util.DatabaseConnexion;
 import dao.IPaiementDao;
 import model.Agent;
 import model.Paiement;
@@ -144,11 +144,12 @@ public class PaiementDaoImpl implements IPaiementDao {
     }
 
     @Override
-    public void delete(Paiement paiement) throws SQLException {
+    public boolean delete(Paiement paiement) throws SQLException {
         Connection con = DatabaseConnexion.getConnection();
         String sql = "DELETE FROM paiements WHERE idPaiement = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, paiement.getIdPaiement());
         stmt.executeUpdate();
+        return true;
     }
 }

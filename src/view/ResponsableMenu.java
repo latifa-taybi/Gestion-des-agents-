@@ -1,25 +1,32 @@
 package view;
 
 import controller.ResponsableController;
+import dao.IAgentDao;
 import model.Agent;
 import model.Departement;
 import model.Paiement;
 import model.enums.TypeAgent;
 import model.enums.TypePaiement;
+import model.exceptions.AgentHorsDepartementException;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Scanner;
 
 public class ResponsableMenu {
 
-    private final ResponsableController controller;
+    private final ResponsableController responsableController;
+    private final int idDep;
+    private final IAgentDao agentDao;
     private final Scanner scanner = new Scanner(System.in);
 
-    public ResponsableMenu(ResponsableController controller) {
-        this.controller = controller;
+    public ResponsableMenu(ResponsableController responsableController, int idDep, IAgentDao agentDao) {
+        this.responsableController = responsableController;
+        this.idDep = idDep;
+        this.agentDao = agentDao;
     }
 
-    public void afficherMenu() {
+    public void afficherMenu() throws SQLException {
         int choix;
         do {
             System.out.println("-----------------------MENU RESPONSABLE-----------------------");
@@ -76,9 +83,7 @@ public class ResponsableMenu {
     }
 
     private void listerAgents() {
-        System.out.print("inserer l id du departement: ");
-        int idDep = scanner.nextInt();
-        controller.listerAgents(idDep);
+        responsableController.listerAgents(idDep);
     }
 
     private void ajouterAgent() {
@@ -90,15 +95,14 @@ public class ResponsableMenu {
         String email = scanner.nextLine();
         System.out.print("entrer le mot de passe: ");
         String mdp = scanner.nextLine();
-        System.out.print("entrer le type de l agent (OUVRIER - RESPONSABLE_DEPARTEMENT - DIRECTEUR - STAGIAIRE) ");
+        System.out.print("entrer le type de l agent (OUVRIER - STAGIAIRE) ");
         TypeAgent type = TypeAgent.valueOf(scanner.nextLine().toUpperCase());
-
         System.out.print("saisir l id de departement: ");
         int idDep = scanner.nextInt();
 
         Departement departement = new Departement(idDep, null);
         Agent agent = new Agent(0, nom, prenom, email, mdp, type);
-        controller.ajouterAgent(agent, departement);
+        responsableController.ajouterAgent(agent, departement);
     }
 
     private void modifierAgent() {
@@ -115,38 +119,50 @@ public class ResponsableMenu {
         String mdp = scanner.nextLine();
         System.out.print("entrer le nouveau type ");
         TypeAgent type = TypeAgent.valueOf(scanner.nextLine().toUpperCase());
+        System.out.println("entrer l id du nouveau departement de l'agent");
+        int idDep = scanner.nextInt();
 
+        Departement departement = new Departement(idDep, null);
         Agent agent = new Agent(id, nom, prenom, email, mdp, type);
-        controller.modifierAgent(agent);
+        agent.setDepartement(departement);
+        responsableController.modifierAgent(agent);
     }
 
     private void supprimerAgent() {
         System.out.print("saisir l id de l agent a supprimer: ");
         int id = scanner.nextInt();
         Agent agent = new Agent(id, null, null, null, null, TypeAgent.OUVRIER);
-        controller.supprimerAgent(agent);
+        responsableController.supprimerAgent(agent);
     }
 
     private void listerPaiements() {
-        System.out.print("saisir l id du departement: ");
-        int idDep = scanner.nextInt();
-        controller.listerPaiementsDepartement(idDep);
+        responsableController.listerPaiementsDepartement(idDep);
     }
 
-    private void ajouterPaiement() {
-        System.out.print("entrer l id de l agent: ");
-        int idAgent = scanner.nextInt();
-        scanner.nextLine();
-        System.out.print("entrer le type de paiement (PRIME - SALAIRE - INDEMNITE): ");
-        TypePaiement type = TypePaiement.valueOf(scanner.nextLine().toUpperCase());
-        System.out.print("entrer le montant: ");
-        double montant = scanner.nextDouble();
-        scanner.nextLine();
-        System.out.print("entrer le motif : ");
-        String motif = scanner.nextLine();
+    private void ajouterPaiement() throws SQLException {
+        try{
+            System.out.print("entrer l id de l agent: ");
+            int idAgent = scanner.nextInt();
+            if(agentDao.get(idAgent).getDepartement().getIdDepartement() != idDep){
+                throw new AgentHorsDepartementException("l'agent n'appartient as a ce departement");
+            }else {
+                scanner.nextLine();
+                System.out.print("entrer le type de paiement (PRIME - SALAIRE): ");
 
-        Paiement paiement = new Paiement(0, type, montant, LocalDate.now(), motif, true, new Agent(idAgent, null, null, null, null, TypeAgent.OUVRIER));
-        controller.ajouterPaiement(paiement);
+                TypePaiement type = TypePaiement.valueOf(scanner.nextLine().toUpperCase());
+                System.out.print("entrer le montant: ");
+                double montant = scanner.nextDouble();
+                scanner.nextLine();
+                System.out.print("entrer le motif: ");
+                String motif = scanner.nextLine();
+
+                Paiement paiement = new Paiement(0, type, montant, LocalDate.now(), motif, true, new Agent(idAgent, null, null, null, null, TypeAgent.OUVRIER));
+                responsableController.ajouterPaiement(paiement);
+            }
+        }catch (SQLException e){
+            throw new SQLException("erreur lors de la recuperation de l agent");
+        }
+
     }
 
     private void modifierPaiement() {
@@ -159,19 +175,19 @@ public class ResponsableMenu {
         String motif = scanner.nextLine();
 
         Paiement paiement = new Paiement(idPaiement, TypePaiement.SALAIRE, montant, LocalDate.now(), motif, true, null);
-        controller.modifierPaiement(paiement);
+        responsableController.modifierPaiement(paiement);
     }
 
     private void supprimerPaiement() {
         System.out.print("saisir l id de paiement a supprimer : ");
         int id = scanner.nextInt();
         Paiement paiement = new Paiement(id, null, 0, null, null, false, null);
-        controller.supprimerPaiement(paiement);
+        responsableController.supprimerPaiement(paiement);
     }
 
     private void afficherStatistiques() {
         System.out.print("saisir l id de departement : ");
         int idDep = scanner.nextInt();
-        controller.afficherStatistiquesDepartement(idDep);
+        responsableController.afficherStatistiquesDepartement(idDep);
     }
 }

@@ -1,6 +1,6 @@
 package dao.impl;
 
-import Util.DatabaseConnexion;
+import util.DatabaseConnexion;
 import dao.IAgentDao;
 import model.Agent;
 import model.Departement;
@@ -104,11 +104,37 @@ public class AgentDaoImpl implements IAgentDao {
     }
 
     @Override
-    public void delete(Agent agent) throws SQLException {
+    public boolean delete(Agent agent) throws SQLException {
         Connection con = DatabaseConnexion.getConnection();
         String sql = "DELETE FROM agents WHERE idAgent = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, agent.getIdAgent());
         stmt.executeUpdate();
+        return true;
+    }
+
+    @Override
+    public Agent findByEmailAndPassword(String email, String password) throws SQLException {
+        Connection con = DatabaseConnexion.getConnection();
+        String sql = "SELECT a.idAgent, a.nom, a.prenom, a.email, a.motDePasse, a.typeAgent, d.idDepartement, d.nom AS depNom FROM agents a LEFT JOIN departements d ON a.idDepartement = d.idDepartement WHERE a.email = ? AND a.motDePasse = ?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setString(1, email);
+        stmt.setString(2, password);
+        ResultSet rs = stmt.executeQuery();
+
+        if(rs.next()){
+            int idA = rs.getInt("idAgent");
+            String firstName = rs.getString("nom");
+            String lastName = rs.getString("prenom");
+            TypeAgent typeAgent = TypeAgent.valueOf(rs.getString("typeAgent"));
+            int depId = rs.getInt("idDepartement");
+            String depNom = rs.getString("depNom");
+
+            Departement dep = new Departement(depId, depNom);
+            Agent agent = new Agent(idA, firstName, lastName, email, password, typeAgent);
+            agent.setDepartement(dep);
+            return agent;
+        }
+        return null;
     }
 }

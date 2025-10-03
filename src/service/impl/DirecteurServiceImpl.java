@@ -64,15 +64,6 @@ public class DirecteurServiceImpl implements IDirecteurService {
     }
 
     @Override
-    public Departement getDepartementById(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
-        try{
-            return departementDao.get(idDepartement);
-        }catch (SQLException e){
-            throw new DatabaseException("erreur lors de la recuperation de departement");
-        }
-    }
-
-    @Override
     public Agent getResponsableDepartement(int idDepartement) throws DatabaseException, DepartementIntrouvableException {
         try{
             List<Agent> agents = agentDao.getAll();
@@ -84,6 +75,36 @@ public class DirecteurServiceImpl implements IDirecteurService {
                     .orElse(null);
         }catch (SQLException e){
             throw new DatabaseException("erreur lors de la re de departement");
+        }
+    }
+
+    @Override
+    public int getNombreTotalAgents() throws DatabaseException {
+        try{
+            return agentDao.getAll().size();
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la re de departement");
+        }
+    }
+
+    @Override
+    public int getNombreTotalDepartements() throws DatabaseException {
+        try{
+            return departementDao.getAll().size();
+        }catch (SQLException e){
+            throw new DatabaseException("erreur lors de la re de departement");
+        }
+    }
+
+    @Override
+    public void consulterAgentsByDepartement(){
+        List<Departement> departements = getAllDepartements();
+        for (Departement d:departements){
+            System.out.println("------------------Departement: " + d.getNom()+" ----------------------");
+            List<Agent> agents = d.getAgents();
+            for (Agent a:agents){
+                System.out.println(a);;
+            }
         }
     }
 

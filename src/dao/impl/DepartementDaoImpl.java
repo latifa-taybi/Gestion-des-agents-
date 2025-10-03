@@ -1,6 +1,8 @@
 package dao.impl;
 
-import Util.DatabaseConnexion;
+import model.Agent;
+import model.enums.TypeAgent;
+import util.DatabaseConnexion;
 import dao.IDepartementDao;
 import model.Departement;
 
@@ -45,9 +47,9 @@ public class DepartementDaoImpl implements IDepartementDao {
 
         while (result.next()){
             int idDep = result.getInt("idDepartement");
-            String idNom = result.getString("nom");
+            String depNom = result.getString("nom");
 
-            departements.add(new Departement(idDep, idNom));
+            departements.add(new Departement(idDep, depNom));
         }
 
 
@@ -77,11 +79,14 @@ public class DepartementDaoImpl implements IDepartementDao {
     }
 
     @Override
-    public void delete(Departement departement) throws SQLException {
+    public boolean delete(Departement departement) throws SQLException {
         Connection con = DatabaseConnexion.getConnection();
         String sql = "DELETE FROM departements WHERE idDepartement = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, departement.getIdDepartement());
         stmt.executeUpdate();
+        return true;
     }
+
+
 }

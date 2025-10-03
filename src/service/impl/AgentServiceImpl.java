@@ -4,23 +4,18 @@ package service.impl;
 import dao.IAgentDao;
 import dao.IPaiementDao;
 import model.Agent;
-import model.Paiement;
 import model.exceptions.AgentIntrouvableException;
 import model.exceptions.DatabaseException;
 import service.IAgentService;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class AgentServiceImpl implements IAgentService {
     private final IAgentDao agentDao;
-    private final IPaiementDao paiementDao;
 
-    public AgentServiceImpl(IAgentDao agentDao, IPaiementDao paiementDao) {
+    public AgentServiceImpl(IAgentDao agentDao) {
         this.agentDao = agentDao;
-        this.paiementDao = paiementDao;
     }
 
     @Override
@@ -73,32 +68,12 @@ public class AgentServiceImpl implements IAgentService {
     }
 
     @Override
-    public List<Paiement> getHistoriquePaiements(int idAgent) throws DatabaseException {
+    public Agent authentifier(String email, String motDePasse) throws DatabaseException {
         try {
-            return paiementDao.getAll()
-                    .stream()
-                    .filter(p -> p.getAgent().getIdAgent() == idAgent)
-                    .collect(Collectors.toList());
+            return agentDao.findByEmailAndPassword(email, motDePasse);
         }catch (SQLException e){
-            throw new DatabaseException("erreur lors de la recuperation de l'historiaue de paiements");
+            throw new DatabaseException("erreur lors de la recuperation d un agent");
         }
     }
-
-    @Override
-    public double calculerTotalPaiements(int idAgent) throws DatabaseException {
-        return getHistoriquePaiements(idAgent)
-                .stream()
-                .mapToDouble(Paiement::getMontant)
-                .sum();
-    }
-
-    @Override
-    public List<Paiement> filtrerPaiements(int idAgent, Predicate<Paiement> critere) throws DatabaseException {
-        return getHistoriquePaiements(idAgent)
-                .stream()
-                .filter(critere)
-                .collect(Collectors.toList());
-    }
-
 }
 

@@ -7,7 +7,7 @@ public class AgentMenu {
 
     private final AgentController controller;
     private final int idAgent;
-    private final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
 
     public AgentMenu(AgentController controller, int idAgent) {
         this.controller = controller;
@@ -21,6 +21,10 @@ public class AgentMenu {
             System.out.println("1.consulter mes informations");
             System.out.println("2.consulter mon historique de paiements");
             System.out.println("3.calculer le total de mes paiements");
+//            System.out.println("3.calculer le salaire annuel total");
+//            System.out.println("3.affichage des paiments les plus eleves");
+//            System.out.println("3.afficher tous les statistiques");
+
             System.out.println("0.Quitter");
             System.out.print("choix : ");
 
@@ -32,7 +36,7 @@ public class AgentMenu {
                     voirInformations();
                     break;
                 case 2 :
-                    voirHistoriquePaiements();
+                    menuPaiementsAgent();
                     break;
                 case 3 :
                     calculerTotalPaiements();
@@ -56,5 +60,28 @@ public class AgentMenu {
 
     private void calculerTotalPaiements() {
         controller.afficherTotalPaiements(idAgent);
+    }
+
+    public void menuPaiementsAgent() {
+        boolean quitter = false;
+        while (!quitter) {
+            System.out.println("------------- HISTORIQUE DE MES PAIEMENTS --------------");
+            System.out.println("1.afficher tous les paiements");
+            System.out.println("2.filtrer par type de paiement");
+            System.out.println("3.filtrer par montant");
+            System.out.println("4.filtrer par date");
+            System.out.println("0.quitter");
+            System.out.print("saisir votre choix: ");
+            int choix = scanner.nextInt();
+
+            switch (choix) {
+                case 1 ->  voirHistoriquePaiements();
+                case 2 -> System.out.println("[Paiements filtrés par type]");
+                case 3 -> System.out.println("[Paiements filtrés par montant]");
+                case 4 -> System.out.println("[Paiements filtrés par date]");
+                case 0 -> quitter = true;
+                default -> System.out.println("Choix invalide !");
+            }
+        }
     }
 }

@@ -16,8 +16,7 @@ public interface IAgentService {
     Agent updateAgent(Agent agent) throws DatabaseException;
     void deleteAgent(Agent agent) throws DatabaseException;
 
-    List<Paiement> getHistoriquePaiements(int idAgent) throws DatabaseException;
-    double calculerTotalPaiements(int idAgent) throws DatabaseException;
-    List<Paiement> filtrerPaiements(int idAgent, Predicate<Paiement> critere) throws DatabaseException;
+    Agent authentifier(String email, String motDePasse) throws SQLException;
+
 
 }

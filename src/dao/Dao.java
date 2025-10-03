@@ -11,5 +11,5 @@ public interface Dao<T> {
     List<T> getAll() throws SQLException;
     T insert(T t) throws SQLException;
     T update(T t) throws SQLException;
-    void delete(T t) throws SQLException;
+    boolean delete(T t) throws SQLException;
 }
